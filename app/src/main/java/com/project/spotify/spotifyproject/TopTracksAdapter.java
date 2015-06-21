@@ -1,6 +1,7 @@
 package com.project.spotify.spotifyproject;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import java.util.List;
  * dis
  */
 public class TopTracksAdapter extends ArrayAdapter {
+
+    private final String LOG_TAG = getClass().getSimpleName();
 
     List objects;
     Context mContext;
@@ -36,7 +39,7 @@ public class TopTracksAdapter extends ArrayAdapter {
 
         // Get the data from the objects list and fill the convert view with them
         if (!objects.isEmpty()) {
-
+            Log.d(LOG_TAG, objects.get(0).toString());
         }
         return convertView;
     }

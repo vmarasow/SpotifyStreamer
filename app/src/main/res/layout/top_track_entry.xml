@@ -7,7 +7,9 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:id="@+id/top_track_image"
-        android:layout_margin="8dp" />
+        android:layout_margin="8dp"
+        android:src="@drawable/default_album_art_big_card"
+        android:scaleType="centerCrop" />
 
     <LinearLayout
         android:orientation="vertical"

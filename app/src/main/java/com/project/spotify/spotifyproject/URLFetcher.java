@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -53,6 +54,7 @@ public class URLFetcher extends AsyncTask<String, Void, ArrayList<ArtistListEntr
 
         switch (data.get(0).toString()) {
             case ARTISTS_QUERY: {
+                Log.d(LOG_TAG, params[1]);
                  ArtistsPager artistsPager = service.searchArtists(params[1]);
 
                 // Parse data and store it in the data ArrayList
@@ -66,9 +68,12 @@ public class URLFetcher extends AsyncTask<String, Void, ArrayList<ArtistListEntr
                             artist.name, artist.id,artist.images.toArray(new Image[]{})
                     ));
                 }
+                break;
             }
             case TOP_TRACKS_QUERY: {
-                Tracks tracks = service.getArtistTopTrack(params[1]);
+                HashMap<String, Object> queryParams = new HashMap<>();
+                queryParams.put(service.COUNTRY, "US");
+                Tracks tracks = service.getArtistTopTrack(params[1], queryParams);
 
                 // Parse data and store it in the data ArrayList
                 // we need trackName, albumName, images and previewURL
@@ -81,6 +86,7 @@ public class URLFetcher extends AsyncTask<String, Void, ArrayList<ArtistListEntr
                     images = track.album.images;
                     data.add(new TopTrack(trackName, albumName, images.get(0).url, images.get(1).url, previewURL));
                 }
+                break;
             }
         }
         return data;
@@ -103,6 +109,7 @@ public class URLFetcher extends AsyncTask<String, Void, ArrayList<ArtistListEntr
                     mArtistAdapter.clear();
                     Toast.makeText(mContext, "There is no such Artist.", Toast.LENGTH_SHORT).show();
                 }
+                break;
             }
             case TOP_TRACKS_QUERY: {
                 // Remove the query code now because we don't need it anymore
@@ -111,6 +118,8 @@ public class URLFetcher extends AsyncTask<String, Void, ArrayList<ArtistListEntr
                 if (result != null && !result.isEmpty()) {
                     mTopTracksAdapter.clear();
                     for (Object entry : result) {
+                        TopTrack track = (TopTrack) entry;
+                        Log.d(LOG_TAG, track.getTrackName());
                         mTopTracksAdapter.add(entry);
                     }
                     mTopTracksAdapter.notifyDataSetChanged();
@@ -118,6 +127,7 @@ public class URLFetcher extends AsyncTask<String, Void, ArrayList<ArtistListEntr
                     mTopTracksAdapter.clear();
                     Toast.makeText(mContext, "Error retrieving data.", Toast.LENGTH_SHORT).show();
                 }
+                break;
             }
         }
     }
