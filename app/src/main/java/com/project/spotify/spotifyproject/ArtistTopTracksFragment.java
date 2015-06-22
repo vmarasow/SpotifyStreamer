@@ -10,6 +10,8 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 
+import kaaes.spotify.webapi.android.models.Track;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -34,10 +36,10 @@ public class ArtistTopTracksFragment extends Fragment {
 
         // Get ListView and set adapter to it
         ListView listView = (ListView) rootview.findViewById(R.id.listView2);
-        mTopTracksAdapter = new TopTracksAdapter(getActivity(), R.layout.top_track_entry, new ArrayList());
+        mTopTracksAdapter = new TopTracksAdapter(getActivity(), R.layout.top_track_entry, new ArrayList<Track>());
         listView.setAdapter(mTopTracksAdapter);
 
-        // Now get the data from spotify and load it in the adapter
+        // Now get the data from Spotify and load it in the adapter
         new URLFetcher(getActivity()).execute(Constants.TOP_TRACKS_QUERY, artistID);
 
         return rootview;

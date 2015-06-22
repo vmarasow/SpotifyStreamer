@@ -2,22 +2,19 @@ package com.project.spotify.spotifyproject;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
-import kaaes.spotify.webapi.android.models.Image;
-import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 
 import static com.project.spotify.spotifyproject.Constants.ARTISTS_QUERY;
+import static com.project.spotify.spotifyproject.Constants.QUERY_KEY;
+import static com.project.spotify.spotifyproject.Constants.RESULT;
 import static com.project.spotify.spotifyproject.Constants.TOP_TRACKS_QUERY;
 
 /**
@@ -26,7 +23,7 @@ import static com.project.spotify.spotifyproject.Constants.TOP_TRACKS_QUERY;
  * This is the updated Adapter that we are using to
  * dis
  */
-public class URLFetcher extends AsyncTask<String, Void, ArrayList<ArtistListEntry>> {
+public class URLFetcher extends AsyncTask<String, Void, HashMap> {
 
     Context mContext;
     ArtistAdapter mArtistAdapter = MainActivityFragment.mArtistAdapter;
@@ -40,34 +37,22 @@ public class URLFetcher extends AsyncTask<String, Void, ArrayList<ArtistListEntr
 
 
     @Override
-    protected ArrayList doInBackground(String... params) {
+    protected HashMap doInBackground(String... params) {
 
         // TODO: using switch to select what type of query to make
         SpotifyApi api = new SpotifyApi();
         SpotifyService service = api.getService();
 
-        ArrayList data = new ArrayList();
-        // Pass in the constant for the type of data to the data arraylist so we can access it in the
-        // onPostExecute.
-        data.add(params[0]);
-        Log.d(LOG_TAG, data.get(0).toString());
+        // TODO: Change return type to HashMap with the result returned from server, and the query type
+        //       with a key, and pass all of it to the adapter and let the adapter deal with it
+        HashMap<String, Object> wrapper = new HashMap<>();
+        wrapper.put(QUERY_KEY, params[0]);
 
-        switch (data.get(0).toString()) {
+        switch (wrapper.get(QUERY_KEY).toString()) {
             case ARTISTS_QUERY: {
-                Log.d(LOG_TAG, params[1]);
-                 ArtistsPager artistsPager = service.searchArtists(params[1]);
+                ArtistsPager artistsPager = service.searchArtists(params[1]);
 
-                // Parse data and store it in the data ArrayList
-                for (Artist artist : artistsPager.artists.items) {
-
-                    // TODO: On refactor place the code to get the right image and store it in the
-                    //  ArtistListEntry, for the ListView we need 200px image, for now playing we need
-                    //  640px.
-
-                    data.add(new ArtistListEntry(
-                            artist.name, artist.id,artist.images.toArray(new Image[]{})
-                    ));
-                }
+                wrapper.put(RESULT, artistsPager.artists.items);
                 break;
             }
             case TOP_TRACKS_QUERY: {
@@ -75,55 +60,39 @@ public class URLFetcher extends AsyncTask<String, Void, ArrayList<ArtistListEntr
                 queryParams.put(service.COUNTRY, "US");
                 Tracks tracks = service.getArtistTopTrack(params[1], queryParams);
 
-                // Parse data and store it in the data ArrayList
-                // we need trackName, albumName, images and previewURL
-                String trackName, albumName, previewURL;
-                List<Image> images;
-                for (Track track : tracks.tracks) {
-                    trackName = track.name;
-                    albumName = track.album.name;
-                    previewURL = track.preview_url;
-                    images = track.album.images;
-                    data.add(new TopTrack(trackName, albumName, images.get(0).url, images.get(1).url, previewURL));
-                }
+                wrapper.put(RESULT, tracks.tracks);
                 break;
             }
         }
-        return data;
+        return wrapper;
     }
 
     @Override
-    protected void onPostExecute(ArrayList result) {
-        super.onPostExecute(result);
+    protected void onPostExecute(HashMap wrapper) {
+        super.onPostExecute(wrapper);
 
-        switch (result.get(0).toString()) {
+        switch (wrapper.get(QUERY_KEY).toString()) {
             case ARTISTS_QUERY: {
-                // Remove the query code now because we don't need it anymore
-                result.remove(0);
                 // Get ArtistAdapter and pass in the List that we just created
-                if (result != null && !result.isEmpty()) {
+                if (wrapper != null && !wrapper.isEmpty()) {
                     mArtistAdapter.clear();
-                    for (Object entry : result) mArtistAdapter.add(entry);
+                    for (Object entry : (List) wrapper.get(RESULT)) mArtistAdapter.add(entry);
                     mArtistAdapter.notifyDataSetChanged();
-                } else if (result.isEmpty() && result != null) {
+                } else if (wrapper.isEmpty() && wrapper != null) {
                     mArtistAdapter.clear();
                     Toast.makeText(mContext, "There is no such Artist.", Toast.LENGTH_SHORT).show();
                 }
                 break;
             }
             case TOP_TRACKS_QUERY: {
-                // Remove the query code now because we don't need it anymore
-                result.remove(0);
                 // Get mTopTracksAdapter and add the new data to it
-                if (result != null && !result.isEmpty()) {
+                if (wrapper != null && !wrapper.isEmpty()) {
                     mTopTracksAdapter.clear();
-                    for (Object entry : result) {
-                        TopTrack track = (TopTrack) entry;
-                        Log.d(LOG_TAG, track.getTrackName());
+                    for (Object entry : (List) wrapper.get(RESULT)) {
                         mTopTracksAdapter.add(entry);
                     }
                     mTopTracksAdapter.notifyDataSetChanged();
-                } else if (result.isEmpty() && result != null) {
+                } else if (wrapper.isEmpty() && wrapper != null) {
                     mTopTracksAdapter.clear();
                     Toast.makeText(mContext, "Error retrieving data.", Toast.LENGTH_SHORT).show();
                 }

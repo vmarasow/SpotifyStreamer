@@ -11,4 +11,8 @@ public class Constants {
     public static final String ARTISTS_QUERY = "artists";
 
     public static final String TOP_TRACKS_QUERY = "topTracks";
+
+    public static final String RESULT = "result";
+
+    public static final String QUERY_KEY = "key";
 }

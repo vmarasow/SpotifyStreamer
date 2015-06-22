@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import kaaes.spotify.webapi.android.models.Artist;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -33,7 +35,7 @@ public class MainActivityFragment extends Fragment {
         final View rootview = inflater.inflate(R.layout.artist_search_activity, container, false);
 
         // Get ahold of the ListView and Set up a Adapter to work with it
-        mArtistAdapter = new ArtistAdapter(getActivity(), R.layout.artist_search_result, new ArrayList<ArtistListEntry>());
+        mArtistAdapter = new ArtistAdapter(getActivity(), R.layout.artist_search_result, new ArrayList<Artist>());
         ListView listView = (ListView) rootview.findViewById(R.id.listView);
         listView.setAdapter(mArtistAdapter);
 
@@ -41,10 +43,10 @@ public class MainActivityFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ArtistListEntry entry = (ArtistListEntry) parent.getAdapter().getItem(position);
+                Artist artist = (Artist) parent.getAdapter().getItem(position);
                 // Now that we have the data of the item clicked on pass it to the next activity.
                 Intent intent = new Intent(getActivity(), ArtistTopTracks.class);
-                intent.putExtra(Intent.EXTRA_TEXT, entry.getId());
+                intent.putExtra(Intent.EXTRA_TEXT, artist.id);
                 startActivity(intent);
             }
         });
